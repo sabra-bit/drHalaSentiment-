@@ -171,17 +171,23 @@ if options:
 
     # Remove stop words
     stop_words = set(stopwords.words('english'))
+    on = st.toggle("English word frequency")
+    wordkey = 'keyWord'
+    if on:
+        wordkey = 'translation'
     for class_name in options:
         try:
             # Filter data by class
+            
+           
             class_df = result_df[result_df['class'] == class_name]
-            keyword_counts = class_df['keyWord'].value_counts().reset_index().head(10)
-            keyword_counts.columns = ['keyWord', 'Count']
-            keyword_counts = keyword_counts.set_index('keyWord')
+            keyword_counts = class_df[wordkey].value_counts().reset_index().head(10)
+            keyword_counts.columns = [wordkey, 'Count']
+            keyword_counts = keyword_counts.set_index(wordkey)
            
         
             sentment = class_df['Sentiment'].value_counts()
-            
+            # class_df
             # Prepare the text for the word cloud
             text = " ".join(class_df["translation"].astype(str))
             arabictext = " ".join(class_df["cleanText"].astype(str))
