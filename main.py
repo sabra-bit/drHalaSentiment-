@@ -9,7 +9,7 @@ from datetime import datetime
 import streamlit.components.v1 as components
 import networkx as nx
 from pyvis.network import Network
-
+import plotly.graph_objects as go
 st.title('arabic text analysis')
 workbook = openpyxl.load_workbook(filename="allData1.xlsx", data_only=True)
 sheet = workbook.active
@@ -66,10 +66,10 @@ options = st.multiselect(
 if options:
     result_df = filtered_df[filtered_df['class'].isin(options)]
     result_df
-
-
+    sentiment_counts = result_df.groupby(['class', 'Sentiment']).size().unstack(fill_value=0)
+    # sentiment_counts
     replications = result_df['class'].value_counts()
-    replications
+    # replications
 
     def create_donut_chart(replications, title):
         st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -98,8 +98,46 @@ if options:
         plt.title(title, fontsize=10)
 
         st.pyplot(fig)
-    create_donut_chart(replications ,'class Distribution' )
+
     
+    replication_df = replications.reset_index()
+    replication_df.columns = ['Class', 'Count']
+    replication_df['Percentage'] = (replication_df['Count'] / replication_df['Count'].sum()) * 100
+
+    # Create bar chart
+    fig = go.Figure(data=[
+        go.Bar(
+            x=replication_df['Class'],
+            y=replication_df['Count'],
+            text=[f"{count} ({pct:.1f}%)" for count, pct in zip(replication_df['Count'], replication_df['Percentage'])],
+            textposition='auto',
+            marker_color='lightblue'
+        )
+    ])
+
+    fig.update_layout(
+        title="Class Distribution",
+        xaxis_title="Class",
+        yaxis_title="Count",
+        height=400
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    
+
+    
+    cols = st.columns(len(replication_df))
+    total = replications.sum()
+    for i, (_, row) in enumerate(replication_df.iterrows()):
+        class_name = row['Class']
+        count = row['Count']
+        percentage = (count / total) * 100
+        cols[i].metric(label=class_name, value=f"{count}", delta=f"{percentage:.1f}%")
+   
+
+       
+            
     def create_translation_dict(file_path, sheet_name):
         df = pd.read_excel(file_path, sheet_name=sheet_name)
         df = df[['word', 'translate']]
@@ -137,11 +175,11 @@ if options:
         try:
             # Filter data by class
             class_df = result_df[result_df['class'] == class_name]
-            keyword_counts = class_df['keyWord'].value_counts().reset_index()
+            keyword_counts = class_df['keyWord'].value_counts().reset_index().head(10)
             keyword_counts.columns = ['keyWord', 'Count']
-
+            keyword_counts = keyword_counts.set_index('keyWord')
+           
         
-
             sentment = class_df['Sentiment'].value_counts()
             
             # Prepare the text for the word cloud
@@ -159,12 +197,13 @@ if options:
 
             # Generate word cloud for this class
             wordcloud = WordCloud(width=800, height=400, background_color='white', stopwords=STOPWORDS, min_font_size=1).generate_from_frequencies(word_counts)
-            st.subheader(f"Trending Words in {class_name} Class")
+            st.subheader(f"Trending Words in :blue[{class_name}] Class")
             st.code(arabictext)
             st.write("copy then follow link [arabic word cloud](https://worditout.com/word-cloud/create).")
-            col1, col2, col3 = st.columns([3, 3, 1])
+            col1, col2, col3 = st.columns([3,2, 2])
             with col1:
             # Display the word cloud
+                st.subheader("word cloud", divider=True)
                 # st.subheader(f"Trending Words in {class_name} Class")
                 st.set_option('deprecation.showPyplotGlobalUse', False)
                 plt.figure(figsize=(8, 8))
@@ -175,19 +214,52 @@ if options:
                 st.pyplot()
             with col2:
                 
-                create_donut_chart(sentment,f"sentment in {class_name} class")
+                sentiment_df = sentment.reset_index()
+                sentiment_df.columns = ['Sentiment', 'Count']
+                rows = [sentiment_df.iloc[i:i+2] for i in range(0, len(sentiment_df), 2)]
+                st.subheader("sentment", divider=True)
+                for row in rows:
+                    cols = st.columns(2)
+                    for i, (_, data) in enumerate(row.iterrows()):
+                        sentiment = data['Sentiment']
+                        count = data['Count']
+                        total = sentment.sum()
+                        percentage = (count / total) * 100
+                        cols[i].metric(label=sentiment, value=f"{count}", delta=f"{percentage:.1f}%")
+
+
+                # create_donut_chart(sentment,f"sentment in {class_name} class")
             with col3:
-                st.write(keyword_counts)
-        except:
+                st.subheader("word frequency", divider=True)
+                keyword_counts['Percentage'] = (keyword_counts['Count'] / keyword_counts['Count'].sum()) * 100
+                fig = go.Figure(data=[
+                go.Bar(
+                    x=keyword_counts.index,
+                    y=keyword_counts['Count'],
+                    text=[f"{count} ({pct:.1f}%)" for count, pct in zip(keyword_counts['Count'], keyword_counts['Percentage'])],
+                    textposition='auto',
+                    marker_color='indianred'
+                        )
+                    ])
+                fig.update_layout(
+                title=f"Top Keywords in {class_name} Class",
+                xaxis_title="Keyword",
+                yaxis_title="Count",
+                height=400
+                 )
+
+                st.plotly_chart(fig, use_container_width=True)
+                # st.bar_chart(keyword_counts['Count'])
+        except Exception as e:
             
-           st.write(f"no data in {class_name}")
+            st.write(f"{e}")
 
         
             
 
     
+    st.subheader("generation of visual network graphs  ", divider=True)
     
-    st.write("generation of visual network graphs  ")
     # Create networkx graph object from pandas dataframe
     G =  nx.MultiGraph()
     
