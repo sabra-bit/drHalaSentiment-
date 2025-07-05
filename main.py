@@ -24,31 +24,36 @@ data = data.dropna()
 new_column_names = {0:'#',1:'scrapedData',2:'Date',3:'cleanText',4: 'class', 5:'keyWord',6:'Sentiment'}
 
 data = data.rename(columns=new_column_names)
-data['Date'] = pd.to_datetime(data['Date'], errors='coerce')
-data['Date'] = pd.to_datetime(data['Date'], format='%d/%m/%Y' , utc=True )
+
+
+data['Date'] = pd.to_datetime(data['Date'], dayfirst=True, errors='coerce', utc=True)
+
+data['Date'] = pd.to_datetime(data['Date'], format='%d-%m-%Y', errors='coerce', utc=True)
 # data['Date'] = data['Date'].dt.strftime('%A %B %Y, %H:%M:%S')
 data
 
 
 
-dateList =['19-06-2024', '18-06-2024', '17-06-2024', '16-06-2024', '15-06-2024', '14-06-2024', '13-06-2024', '12-06-2024', '11-06-2024', '10-06-2024', '09-06-2024', '08-06-2024', '07-06-2024', '06-06-2024', '05-06-2024', '04-06-2024', '03-06-2024', '02-06-2024', '01-06-2024', '31-05-2024', '30-05-2024', '29-05-2024', '28-05-2024', '27-05-2024', '26-05-2024', '25-05-2024', '24-05-2024', '23-05-2024', '22-05-2024', '21-05-2024', '20-05-2024', '19-05-2024', '18-05-2024', '17-05-2024', '16-05-2024', '15-05-2024', '14-05-2024', '13-05-2024', '12-05-2024', '11-05-2024', '10-05-2024', '09-05-2024', '08-05-2024', '07-05-2024', '06-05-2024', '05-05-2024', '04-05-2024', '03-05-2024', '02-05-2024', '01-05-2024', '30-04-2024', '29-04-2024', '28-04-2024', '27-04-2024', '26-04-2024', '25-04-2024', '24-04-2024', '23-04-2024', '22-04-2024', '21-04-2024', '20-04-2024', '19-04-2024', '18-04-2024', '17-04-2024', '16-04-2024', '15-04-2024', '13-04-2024', '12-04-2024', '11-04-2024', '10-04-2024', '09-04-2024', '08-04-2024', '07-04-2024', '06-04-2024', '05-04-2024', '04-04-2024', '03-04-2024', '02-04-2024', '01-04-2024', '31-03-2024', '30-03-2024', '29-03-2024', '28-03-2024', '27-03-2024', '26-03-2024', '25-03-2024', '24-03-2024', '23-03-2024', '22-03-2024', '21-03-2024', '20-03-2024', '19-03-2024', '18-03-2024', '17-03-2024', '16-03-2024', '15-03-2024', '14-03-2024', '13-03-2024', '12-03-2024', '11-03-2024', '10-03-2024', '09-03-2024', '08-03-2024', '07-03-2024', '06-03-2024', '05-03-2024', '04-03-2024', '03-03-2024', '02-03-2024', '01-03-2024', '29-02-2024', '28-02-2024', '27-02-2024', '26-02-2024', '25-02-2024', '24-02-2024', '23-02-2024', '22-02-2024', '20-02-2024', '19-02-2024', '18-02-2024', '17-02-2024', '16-02-2024', '15-02-2024', '14-02-2024', '13-02-2024', '12-02-2024', '10-02-2024', '09-02-2024', '08-02-2024', '06-02-2024', '05-02-2024', '04-02-2024', '02-02-2024', '01-02-2024', '31-01-2024', '30-01-2024', '29-01-2024', '08-01-2024', '04-01-2024', '03-01-2024', '02-01-2024', '01-01-2024', '01-12-2023', '01-11-2023', '01-10-2023', '01-09-2023', '01-08-2023', '01-07-2023', '01-06-2023', '09-05-2023', '02-05-2023', '01-05-2023', '01-04-2023', '01-03-2023', '01-02-2023', '01-01-2023', '01-12-2022', '01-11-2022', '01-10-2022', '01-09-2022', '01-08-2022', '01-07-2022', '01-06-2022', '01-05-2022', '01-04-2022', '01-03-2022', '01-02-2022', '01-01-2022', '01-12-2021', '01-11-2021', '01-10-2021', '01-09-2021', '01-08-2021', '01-07-2021', '01-06-2021', '01-05-2021', '01-04-2021', '01-03-2021', '01-02-2021', '01-01-2021', '01-12-2020', '01-11-2020', '01-10-2020', '01-09-2020', '01-08-2020', '01-07-2020', '01-06-2020', '01-05-2020', '01-04-2020', '01-03-2020', '01-02-2020', '01-01-2020', '01-12-2019', '01-11-2019', '01-10-2019', '01-09-2019', '01-08-2019', '01-07-2019', '01-06-2019', '01-05-2019', '01-04-2019', '01-03-2019', '01-02-2019', '01-01-2019', '01-12-2018', '01-11-2018', '01-10-2018', '01-09-2018', '01-08-2018', '01-06-2018', '01-05-2018', '01-04-2018', '01-03-2018', '01-01-2018', '01-11-2017', '01-08-2017', '01-08-2016', '01-06-2016', '01-09-2015', '01-10-2010']
-series = pd.Series(dateList )
+data['Date'] = pd.to_datetime(data['Date'], dayfirst=True, errors='coerce')
 
-# Convert dates to datetime objects
-series = pd.to_datetime(series)
+# Step 2: Drop missing/invalid dates
+valid_dates = data['Date'].dropna()
 
-# Sort the Series
-sorted_dates = series.sort_values().tolist()
-list = []
-print(sorted_dates)
-for i in sorted_dates:
-    list.append(str(i).split(' ')[0])
+# Step 3: Get unique dates and sort them
+sorted_dates = valid_dates.drop_duplicates().sort_values()
+
+# Step 4: Convert to string format (e.g., 'YYYY-MM-DD' or any you prefer)
+date_string_list = sorted_dates.dt.strftime('%Y-%m-%d').tolist()
+
+
+
+
     
 
 start_Date, end_Date = st.select_slider(
     "Select a range of Date",
-    options=list,
-    value=(list[0], list[-1]),
+    options=date_string_list,
+    value=(date_string_list[0], date_string_list[-1]),
 )
 
 
@@ -66,6 +71,7 @@ options = st.multiselect(
 if options:
     result_df = filtered_df[filtered_df['class'].isin(options)]
     result_df
+    
     sentiment_counts = result_df.groupby(['class', 'Sentiment']).size().unstack(fill_value=0)
     # sentiment_counts
     replications = result_df['class'].value_counts()
@@ -190,7 +196,7 @@ if options:
             # class_df
             # Prepare the text for the word cloud
             text = " ".join(class_df["translation"].astype(str))
-            arabictext = " ".join(class_df["cleanText"].astype(str))
+            arabictext = " ".join(class_df["keyWord"].astype(str))
             # Tokenize and remove stop words
             words = nltk.word_tokenize(text)
             filtered_words = [word for word in words if word not in stop_words]
@@ -211,13 +217,13 @@ if options:
             # Display the word cloud
                 st.subheader("word cloud", divider=True)
                 # st.subheader(f"Trending Words in {class_name} Class")
-                st.set_option('deprecation.showPyplotGlobalUse', False)
-                plt.figure(figsize=(8, 8))
-                plt.imshow(wordcloud, interpolation='bilinear')
-                
-                plt.axis('off')
-                plt.title(f"Trending Words in {class_name} Class")
-                st.pyplot()
+                # st.set_option('deprecation.showPyplotGlobalUse', False)
+                fig, ax = plt.subplots(figsize=(8, 8))
+                ax.imshow(wordcloud, interpolation='bilinear')
+                ax.axis('off')
+                ax.set_title(f"Trending Words in {class_name} Class")
+                st.pyplot(fig)  # ✅ آمن ومعتمد
+
             with col2:
                 
                 sentiment_df = sentment.reset_index()
